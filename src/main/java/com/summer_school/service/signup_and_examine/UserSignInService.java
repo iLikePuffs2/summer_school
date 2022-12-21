@@ -1,10 +1,4 @@
-package com.summer_school.service;
-
-import com.summer_school.dao.user_sign_in.SystemAdministratorDao;
-import com.summer_school.domain.user.AbstractUser;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
+package com.summer_school.service.signup_and_examine;
 
 public interface UserSignInService {
     /**

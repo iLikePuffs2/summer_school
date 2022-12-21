@@ -1,4 +1,4 @@
-package com.summer_school.domain.user;
+package com.summer_school.domain.user.lasting;
 
 public abstract class AbstractUser {
     private Integer id;

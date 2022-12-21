@@ -1,17 +1,13 @@
-package com.summer_school.service.impl;
+package com.summer_school.service.signup_and_examine.impl;
 
-import com.summer_school.dao.user_sign_in.EducationalAdministartorDao;
-import com.summer_school.dao.user_sign_in.StudentDao;
-import com.summer_school.dao.user_sign_in.SystemAdministratorDao;
-import com.summer_school.dao.user_sign_in.TeacherDao;
-import com.summer_school.domain.user.AbstractUser;
-import com.summer_school.service.UserService;
+import com.summer_school.dao.user.EducationalAdministartorDao;
+import com.summer_school.dao.user.StudentDao;
+import com.summer_school.dao.user.SystemAdministratorDao;
+import com.summer_school.dao.user.TeacherDao;
 
-import com.summer_school.service.UserSignInService;
+import com.summer_school.service.signup_and_examine.UserSignInService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserSignInImpl implements UserSignInService {

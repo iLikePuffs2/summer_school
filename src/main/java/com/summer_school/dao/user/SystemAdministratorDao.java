@@ -1,7 +1,6 @@
-package com.summer_school.dao.user_sign_in;
+package com.summer_school.dao.user;
 
-import com.summer_school.domain.user.AbstractUser;
-import com.summer_school.domain.user.SystemAdministrator;
+import com.summer_school.domain.user.lasting.SystemAdministrator;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 

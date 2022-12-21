@@ -1,4 +1,4 @@
-package com.summer_school.controller;
+package com.summer_school.controller.tool;
 
 public class Result {
     private Object data;
