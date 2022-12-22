@@ -1,4 +1,4 @@
-package com.summer_school.domain.user.temp;
+package com.summer_school.pojo.user.temp;
 
 public class SignUpAdminTeacher {
 

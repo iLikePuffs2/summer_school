@@ -1,7 +1,6 @@
-package com.summer_school.domain.user.lasting;
+package com.summer_school.pojo.user.lasting;
 
-public class EducationalAdministartor extends AbstractUser{
-
+public class Teacher extends AbstractUser{
     /**
      * 姓名
      * 职称
@@ -14,10 +13,10 @@ public class EducationalAdministartor extends AbstractUser{
     private String academy;
 
 
-    public EducationalAdministartor() {
+    public Teacher() {
     }
 
-    public EducationalAdministartor(String name, String post, String schoolName, String academy) {
+    public Teacher(String name, String post, String schoolName, String academy) {
         this.name = name;
         this.post = post;
         this.schoolName = schoolName;
@@ -89,6 +88,6 @@ public class EducationalAdministartor extends AbstractUser{
     }
 
     public String toString() {
-        return "EducationalAdministartor{name = " + name + ", post = " + post + ", schoolName = " + schoolName + ", academy = " + academy + "}";
+        return "Teacher{name = " + name + ", post = " + post + ", schoolName = " + schoolName + ", academy = " + academy + "}";
     }
 }

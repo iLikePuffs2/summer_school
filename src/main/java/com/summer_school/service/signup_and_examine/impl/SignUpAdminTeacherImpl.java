@@ -1,7 +1,7 @@
 package com.summer_school.service.signup_and_examine.impl;
 
 import com.summer_school.dao.user.EducationalAdministartorDao;
-import com.summer_school.domain.user.lasting.AbstractUser;
+import com.summer_school.pojo.user.lasting.AbstractUser;
 import com.summer_school.service.signup_and_examine.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

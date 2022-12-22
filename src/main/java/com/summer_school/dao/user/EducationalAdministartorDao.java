@@ -1,6 +1,6 @@
 package com.summer_school.dao.user;
 
-import com.summer_school.domain.user.lasting.EducationalAdministartor;
+import com.summer_school.pojo.user.lasting.EducationalAdministartor;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;

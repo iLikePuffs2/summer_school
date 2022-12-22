@@ -1,4 +1,4 @@
-package com.summer_school.domain.summer_school;
+package com.summer_school.pojo.summer_school;
 
 public class SummerSchool {
     private String summerSchoolName;

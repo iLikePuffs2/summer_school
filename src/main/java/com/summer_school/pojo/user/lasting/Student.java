@@ -1,4 +1,4 @@
-package com.summer_school.domain.user.lasting;
+package com.summer_school.pojo.user.lasting;
 
 public class Student extends AbstractUser {
 

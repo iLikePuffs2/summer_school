@@ -1,6 +1,6 @@
 package com.summer_school.service.signup_and_examine;
 
-import com.summer_school.domain.user.lasting.AbstractUser;
+import com.summer_school.pojo.user.lasting.AbstractUser;
 
 public interface UserService {
 
