@@ -1,4 +1,4 @@
-package com.summer_school.controller.signup_and_examine.init;
+package com.summer_school.controller.signup_and_examine;
 
 import com.alibaba.fastjson.JSON;
 import com.summer_school.controller.tool.Result;

@@ -5,6 +5,8 @@ import com.summer_school.pojo.po.SystemAdministrator;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface SystemAdministratorDao {
 
@@ -14,5 +16,5 @@ public interface SystemAdministratorDao {
      * @return
      */
     @Select("select * from system_administrator_table where account = #{account} and password = #{password}")
-    public SystemAdministrator signIn(SignIn signIn);
+    public List<SystemAdministrator> signIn(SignIn signIn);
 }

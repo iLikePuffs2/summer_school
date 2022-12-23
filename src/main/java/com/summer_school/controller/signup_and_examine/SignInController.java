@@ -1,4 +1,4 @@
-package com.summer_school.controller.signup_and_examine.signin;
+package com.summer_school.controller.signup_and_examine;
 
 import com.summer_school.controller.tool.Result;
 import com.summer_school.pojo.dto.SignIn;
