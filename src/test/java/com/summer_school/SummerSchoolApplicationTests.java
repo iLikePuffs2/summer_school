@@ -1,21 +1,26 @@
 package com.summer_school;
 
-import com.summer_school.dao.EducationalAdministartorDao;
-import com.summer_school.pojo.po.SignUpAdminTeacher;
+import com.summer_school.service.data_cleaning.FormCleaningService;
+import com.summer_school.service.data_cleaning.impl.SignUpFormImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class SummerSchoolApplicationTests {
 
+    @Qualifier("signUpFormImpl")
     @Autowired
-    private EducationalAdministartorDao educationalAdministartorDao;
+    private FormCleaningService formCleaningService;
+
     @Test
     void testSignIn() {
-        SignUpAdminTeacher signUpAdminTeacher = new SignUpAdminTeacher();
-        signUpAdminTeacher.setYear(2022);
-        educationalAdministartorDao.signup(signUpAdminTeacher);
+        try {
+            formCleaningService.clean();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
