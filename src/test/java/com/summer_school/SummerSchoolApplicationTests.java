@@ -1,7 +1,7 @@
 package com.summer_school;
 
-import com.summer_school.dao.summer_school.SummerSchoolDao;
-import com.summer_school.service.signup_and_examine.UserSignInService;
+import com.summer_school.dao.EducationalAdministartorDao;
+import com.summer_school.pojo.po.SignUpAdminTeacher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,10 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 class SummerSchoolApplicationTests {
 
     @Autowired
-    private SummerSchoolDao summerSchoolDao;
+    private EducationalAdministartorDao educationalAdministartorDao;
     @Test
     void testSignIn() {
-        System.out.println(summerSchoolDao.selectAll());
+        SignUpAdminTeacher signUpAdminTeacher = new SignUpAdminTeacher();
+        signUpAdminTeacher.setYear(2022);
+        educationalAdministartorDao.signup(signUpAdminTeacher);
     }
 
 }

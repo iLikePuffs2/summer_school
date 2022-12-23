@@ -3,20 +3,30 @@ package com.summer_school.controller.tool;
 public class Result {
     private Object data;
     private Integer code;
-    private String msg;
+    private boolean success;
+
 
     public Result() {
     }
 
-    public Result(Integer code, Object data) {
-        this.data = data;
-        this.code = code;
+    public Result(boolean success) {
+        this.success = success;
     }
 
-    public Result(Integer code, Object data, String msg) {
+    public Result(boolean success, Object data, Integer code) {
         this.data = data;
         this.code = code;
-        this.msg = msg;
+        this.success = success;
+    }
+
+    public Result(boolean success, Object data) {
+        this.data = data;
+        this.success = success;
+    }
+
+    public Result(boolean success, Integer code) {
+        this.code = code;
+        this.success = success;
     }
 
     /**
@@ -53,21 +63,21 @@ public class Result {
 
     /**
      * 获取
-     * @return msg
+     * @return success
      */
-    public String getMsg() {
-        return msg;
+    public boolean isSuccess() {
+        return success;
     }
 
     /**
      * 设置
-     * @param msg
+     * @param success
      */
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     public String toString() {
-        return "Result{data = " + data + ", code = " + code + ", msg = " + msg + "}";
+        return "Result{data = " + data + ", code = " + code + ", success = " + success + "}";
     }
 }

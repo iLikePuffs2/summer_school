@@ -1,6 +1,6 @@
-package com.summer_school.pojo.user.temp;
+package com.summer_school.pojo.po;
 
-public class SignUpAdminTeacher {
+public class SignUpAdminTeacher{
 
     /**
      * 身份（老师/教务管理员）
@@ -16,7 +16,7 @@ public class SignUpAdminTeacher {
      */
     private String identity;
     private String summerSchoolName;
-    private Integer year;
+    private int year;
     private String account;
     private String password;
     private String name;

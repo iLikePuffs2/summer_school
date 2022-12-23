@@ -1,6 +1,6 @@
-package com.summer_school.dao.summer_school;
+package com.summer_school.dao;
 
-import com.summer_school.pojo.summer_school.SummerSchool;
+import com.summer_school.pojo.dto.SummerSchool;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
