@@ -15,9 +15,9 @@ class SummerSchoolApplicationTests {
     private FormCleaningService formCleaningService;
 
     @Test
-    void testSignIn() {
+    void testSignUp() {
         try {
-            formCleaningService.clean();
+            formCleaningService.execute();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
