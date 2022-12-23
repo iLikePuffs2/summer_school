@@ -16,10 +16,15 @@ public class SignInController {
     @Autowired
     UserSignInService userSignInService;
 
+    /**
+     * 输入账号和密码，验证成功后返回账号对应的用户身份
+     * @param signIn (账号和密码）
+     * @return identity 用户身份
+     */
     @PostMapping
     public Result signin(@RequestBody SignIn signIn){
         String identity = userSignInService.signIn(signIn);
-        return new Result((userSignInService.signIn(signIn) != null) ? true : false,identity);
+        return new Result(identity != null ? true : false,identity);
     }
 
 

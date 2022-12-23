@@ -1,6 +1,5 @@
 package com.summer_school.controller.signup_and_examine;
 
-import com.alibaba.fastjson.JSON;
 import com.summer_school.controller.tool.Result;
 import com.summer_school.pojo.dto.SummerSchool;
 import com.summer_school.service.signup_and_examine.CreateSummerSchoolService;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/school/init")
-public class InitSummerSchoolController {
+public class SummerSchoolInitController {
 
     @Autowired
     private CreateSummerSchoolService createSummerSchoolService;

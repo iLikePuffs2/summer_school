@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserSignInImpl implements UserSignInService {
+public class UserSignInServiceImpl implements UserSignInService {
 
     @Autowired
     private SystemAdministratorDao systemAdministratorDao;
@@ -25,7 +25,11 @@ public class UserSignInImpl implements UserSignInService {
     @Autowired
     private StudentDao studentDao;
 
-    //查询账号和密码，并携带身份返回
+    /**
+     * 查询账号和密码，并携带身份返回
+     * @param signIn
+     * @return identity
+     */
     @Override
     public String signIn(SignIn signIn) {
         if (systemAdministratorDao.signIn(signIn) != null){

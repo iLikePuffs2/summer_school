@@ -16,5 +16,5 @@ public interface SystemAdministratorDao {
      * @return
      */
     @Select("select * from system_administrator_table where account = #{account} and password = #{password}")
-    public List<SystemAdministrator> signIn(SignIn signIn);
+    public SystemAdministrator signIn(SignIn signIn);
 }
