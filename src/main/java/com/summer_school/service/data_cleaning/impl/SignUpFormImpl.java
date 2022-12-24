@@ -3,9 +3,11 @@ package com.summer_school.service.data_cleaning.impl;
 import com.csvreader.CsvReader;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
+import com.summer_school.dao.StudentDao;
 import com.summer_school.dao.SummerSchoolDao;
-import com.summer_school.pojo.SignUpForm;
+import com.summer_school.pojo.dto.CleanSignUp;
 import com.summer_school.pojo.po.SchoolLevelContrast;
+import com.summer_school.pojo.po.Student;
 import com.summer_school.service.data_cleaning.FormCleaningService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,6 +17,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -26,7 +29,6 @@ import java.util.List;
 @Service
 public class SignUpFormImpl implements FormCleaningService {
 
-    private SignUpForm signUpForm = new SignUpForm();
     private List<String> studentName = new ArrayList<>();
     private List<String> gender = new ArrayList<>();
     private List<String> schoolName = new ArrayList<>();
@@ -41,19 +43,8 @@ public class SignUpFormImpl implements FormCleaningService {
     @Autowired
     SummerSchoolDao summerSchoolDao;
 
-
-    @Override
-    public boolean execute() {
-        try {
-            readToList();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        clean();
-
-        return true;
-    }
+    @Autowired
+    StudentDao studentDao;
 
     /**
      * 将表格里每列的数据读到一个list里
@@ -61,14 +52,15 @@ public class SignUpFormImpl implements FormCleaningService {
      * @return 这些list的集合
      */
     @Override
-    public void readToList() throws Exception {
+    public void readToList(CleanSignUp cleanSignUp) throws Exception {
 
-        String csvFilePath = "src/main/java/com/summer_school/file/SignUp.csv";
+        String fileURL = cleanSignUp.getFileURL();
+//        fileURL = "\""+fileURL+"\"";
         try {
             //容器：对象少的时候，直接把对象列出来；当对象很多的时候，要用一个容器装起来打包
             ArrayList<String[]> csvFileList = new ArrayList<String[]>();
             // 这个不用背，只要看得懂会用就行。创建CSV读对象 例如:CsvReader(文件路径，分隔符，编码格式);
-            CsvReader reader = new CsvReader(csvFilePath, ',', Charset.forName("GBK"));
+            CsvReader reader = new CsvReader(fileURL, ',', Charset.forName("GBK"));
             // 跳过表头 如果需要表头的话，这句可以忽略
             reader.readHeaders();
             // 逐行读入除表头的数据
@@ -114,9 +106,6 @@ public class SignUpFormImpl implements FormCleaningService {
         //清洗就读年级
         cleanGrade();
 
-        //清洗学校名字+获得对应的学校层次
-        cleanSchoolName();
-
         //清洗专业名称
         cleanProfession();
     }
@@ -126,7 +115,8 @@ public class SignUpFormImpl implements FormCleaningService {
      */
     @Override
     public void analyze() {
-
+        //清洗学校名字+获得对应的学校层次
+        cleanSchoolName();
     }
 
     /**
@@ -134,9 +124,30 @@ public class SignUpFormImpl implements FormCleaningService {
      *
      * @return
      */
+
     @Override
-    public boolean save() {
-        return false;
+    public boolean save(CleanSignUp cleanSignUp) {
+
+        int insertNum = 0;
+        Student student = new Student();
+        student.setSummerSchoolId(cleanSignUp.getSummerSchoolId());
+        student.setIdentity("学生");
+
+        for (int i = 0; i < schoolName.size(); i++) {
+            student.setSchoolName(schoolName.get(i));
+            student.setGender(gender.get(i));
+            student.setStudentName(studentName.get(i));
+            student.setStudentType(studentType.get(i));
+            student.setGrade(grade.get(i));
+            student.setProfession(profession.get(i));
+            student.setPoliticalStatus(politicalStatus.get(i));
+            student.setSchoolLevel(schoolLevel.get(i));
+            studentDao.insertSignUp(student);
+            insertNum++;
+        }
+
+
+        return insertNum == schoolName.size() ? true : false;
     }
 
     /**
@@ -145,6 +156,7 @@ public class SignUpFormImpl implements FormCleaningService {
     private void removePunctuation(List<String> list) {
         for (int i = 0; i < list.size(); i++) {
             String washed = list.get(i).replaceAll("\\p{Punct}", "");
+            washed = washed.replaceAll("\\R", "");
             list.set(i, washed);
         }
     }

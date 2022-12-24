@@ -1,5 +1,6 @@
 package com.summer_school.service.data_cleaning.impl;
 
+import com.summer_school.pojo.dto.CleanSignUp;
 import com.summer_school.service.data_cleaning.FormCleaningService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -25,30 +26,17 @@ public class SignInFormImpl implements FormCleaningService {
     private List<String> schoolName = new ArrayList<>();
     private List<List<String>> schoolNameList = new ArrayList<>();
 
-
-    @Override
-    public boolean execute() {
-
-        try {
-            readToList();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        clean();
-
-        return false;
-    }
-
     /**
      * 将表格里每列的数据读到一个list里
      *
      * @return 这些list的集合
      */
     @Override
-    public void readToList() throws Exception {
+    public void readToList(CleanSignUp cleanSignUp) throws Exception {
 
-        File excel = new File("src/main/java/com/summer_school/file/SignIn.xlsx");
+
+        String fileURL = cleanSignUp.getFileURL();
+        File excel = new File(fileURL);
         Workbook wb;
 
         wb = new XSSFWorkbook(new FileInputStream(excel));
@@ -124,7 +112,7 @@ public class SignInFormImpl implements FormCleaningService {
      * @return
      */
     @Override
-    public boolean save() {
+    public boolean save(CleanSignUp cleanSignUp) {
         return false;
     }
 
