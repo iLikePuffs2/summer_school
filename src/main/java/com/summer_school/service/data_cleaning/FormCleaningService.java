@@ -1,9 +1,7 @@
 package com.summer_school.service.data_cleaning;
 
-import com.summer_school.pojo.dto.CleanSignUp;
+import com.summer_school.pojo.dto.CleanInfo;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 读取
@@ -13,24 +11,24 @@ import java.util.List;
 public interface FormCleaningService {
 
     @Transactional(rollbackFor = Exception.class)
-    default boolean execute(CleanSignUp cleanSignUp){
+    default boolean execute(CleanInfo cleanInfo){
         try {
-            readToList(cleanSignUp);
+            readToList(cleanInfo);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         clean();
 
-        analyze();
+        analyze(cleanInfo);
 
-        return save(cleanSignUp);
+        return save(cleanInfo);
     }
     /**
      * 将表格里每列的数据读到一个list里
      * 传入参数为excel表格文件的URL
      */
-    void readToList(CleanSignUp cleanSignUp) throws Exception;
+    void readToList(CleanInfo cleanInfo) throws Exception;
 
     /**
      * 调用相关清洗算法进行清洗
@@ -40,13 +38,20 @@ public interface FormCleaningService {
     /**
      * 调用相关分析算法进行分析
      */
-    void analyze();
+    void analyze(CleanInfo cleanInfo);
 
     /**
      * 将数据存入数据库
      * @return
      */
 
-    boolean save(CleanSignUp cleanSignUp);
+    boolean save(CleanInfo cleanInfo);
 
 }
+
+/**
+ * 清空数据库表
+ * SET FOREIGN_KEY_CHECKS=0;
+ * truncate table student_table;
+ * SET FOREIGN_KEY_CHECKS=1;
+ */

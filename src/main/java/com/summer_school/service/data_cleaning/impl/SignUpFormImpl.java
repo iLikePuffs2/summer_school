@@ -1,28 +1,18 @@
 package com.summer_school.service.data_cleaning.impl;
 
 import com.csvreader.CsvReader;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVReader;
 import com.summer_school.dao.StudentDao;
 import com.summer_school.dao.SummerSchoolDao;
-import com.summer_school.pojo.dto.CleanSignUp;
+import com.summer_school.pojo.dto.CleanInfo;
 import com.summer_school.pojo.po.SchoolLevelContrast;
 import com.summer_school.pojo.po.Student;
 import com.summer_school.service.data_cleaning.FormCleaningService;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,9 +42,9 @@ public class SignUpFormImpl implements FormCleaningService {
      * @return 这些list的集合
      */
     @Override
-    public void readToList(CleanSignUp cleanSignUp) throws Exception {
+    public void readToList(CleanInfo cleanInfo) throws Exception {
 
-        String fileURL = cleanSignUp.getFileURL();
+        String fileURL = cleanInfo.getFileURL();
 //        fileURL = "\""+fileURL+"\"";
         try {
             //容器：对象少的时候，直接把对象列出来；当对象很多的时候，要用一个容器装起来打包
@@ -114,7 +104,7 @@ public class SignUpFormImpl implements FormCleaningService {
      * 调用相关分析算法进行分析
      */
     @Override
-    public void analyze() {
+    public void analyze(CleanInfo cleanInfo) {
         //清洗学校名字+获得对应的学校层次
         cleanSchoolName();
     }
@@ -126,11 +116,11 @@ public class SignUpFormImpl implements FormCleaningService {
      */
 
     @Override
-    public boolean save(CleanSignUp cleanSignUp) {
+    public boolean save(CleanInfo cleanInfo) {
 
         int insertNum = 0;
         Student student = new Student();
-        student.setSummerSchoolId(cleanSignUp.getSummerSchoolId());
+        student.setSummerSchoolId(cleanInfo.getSummerSchoolId());
         student.setIdentity("学生");
 
         for (int i = 0; i < schoolName.size(); i++) {

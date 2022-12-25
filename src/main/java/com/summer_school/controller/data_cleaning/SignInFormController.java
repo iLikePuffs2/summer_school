@@ -6,13 +6,16 @@ import com.summer_school.pojo.dto.CleanInfo;
 import com.summer_school.service.data_cleaning.FormCleaningService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/clean/signup")
-public class SignUpFormController {
+@RequestMapping("/clean/signin")
+public class SignInFormController {
 
-    @Qualifier("signUpFormImpl")
+    @Qualifier("signInFormImpl")
     @Autowired
     FormCleaningService formCleaningService;
 

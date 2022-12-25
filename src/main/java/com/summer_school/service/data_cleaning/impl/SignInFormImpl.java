@@ -1,30 +1,42 @@
 package com.summer_school.service.data_cleaning.impl;
 
-import com.summer_school.pojo.dto.CleanSignUp;
+import com.summer_school.dao.HotSpotDao;
+import com.summer_school.dao.StudentDao;
+import com.summer_school.pojo.dto.CleanInfo;
+import com.summer_school.pojo.po.HotSpotSignIn;
+import com.summer_school.pojo.po.Student;
 import com.summer_school.service.data_cleaning.FormCleaningService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.Temporal;
+import java.util.*;
 
-import static com.summer_school.service.data_cleaning.impl.ParticipationDetailFormImpl.extractNameAndSchool;
-import static com.summer_school.service.data_cleaning.impl.ParticipationDetailFormImpl.isAllChinese;
+import static com.summer_school.service.data_cleaning.impl.ParticipationFormImpl.extractNameAndSchool;
+import static com.summer_school.service.data_cleaning.impl.ParticipationFormImpl.isAllChinese;
 
 @Service
 public class SignInFormImpl implements FormCleaningService {
-    private List<String> startSignInTime = new ArrayList<>();
+    private List startSignInTime = new ArrayList<>();
     private List<List<String>> userName = new ArrayList<>();
-    private List<List<String>> signInTime = new ArrayList<>();
-    private List<String> schoolName = new ArrayList<>();
+    private List<List> signInTime = new ArrayList<>();
     private List<List<String>> schoolNameList = new ArrayList<>();
+
+    @Autowired
+    StudentDao studentDao;
+    @Autowired
+    HotSpotDao hotSpotDao;
 
     /**
      * 将表格里每列的数据读到一个list里
@@ -32,10 +44,10 @@ public class SignInFormImpl implements FormCleaningService {
      * @return 这些list的集合
      */
     @Override
-    public void readToList(CleanSignUp cleanSignUp) throws Exception {
+    public void readToList(CleanInfo cleanInfo) throws Exception {
 
 
-        String fileURL = cleanSignUp.getFileURL();
+        String fileURL = cleanInfo.getFileURL();
         File excel = new File(fileURL);
         Workbook wb;
 
@@ -52,7 +64,8 @@ public class SignInFormImpl implements FormCleaningService {
             //读取签到开始时间(从索引7开始截取,就没有中文了)
             Row row = sheet.getRow(0);
             Cell cell = row.getCell(0);
-            startSignInTime.add(cell.toString().substring(7));
+            String startTime = cell.toString().substring(7).trim();
+            startSignInTime.add(startTime);
 
 
             int lastRowIndex = sheet.getLastRowNum();
@@ -96,13 +109,63 @@ public class SignInFormImpl implements FormCleaningService {
 
         //清洗签到表里的名字+学校名称
         cleanUserNameAndSchool();
+
+        //移除获得的列表里的空的名字
+        removeNull();
+
+        //清洗签到开始时间
+        cleanTime(startSignInTime);
+
+        //清洗每个学生的签到时间
+        for (int i = 0; i < startSignInTime.size(); i++) {
+            cleanTime(signInTime.get(i));
+        }
+
+        System.out.println("");
     }
 
     /**
-     * 调用相关分析算法进行分析
+     * 计算签到评分（只计算这个暑期学校的学生）
      */
     @Override
-    public void analyze() {
+    public void analyze(CleanInfo cleanInfo) {
+        List<HotSpotSignIn> hotSpotSignIns = new ArrayList<>();
+
+        //根据传入的暑期学校id，从学生表里找出这个暑期学校所有的学生名字和id（接收）
+        List<Student> student = studentDao.showPartStudentInfo(cleanInfo.getSummerSchoolId());
+
+        //根据传入的研究热点名字，从研究热点热点表中找出每个对应的id
+        List<Integer> hotSpotId = new ArrayList<>();
+        for (int i = 0; i < cleanInfo.getHotSpotName().length; i++) {
+            hotSpotId.add(hotSpotDao.selectIdByName(cleanInfo.getHotSpotNameSingle()));
+        }
+
+        //有几个签到表，最外层就循环几次;第几个签到表，就对应第几个研究热点
+        for (int i = 0; i < userName.size(); i++) {
+            //这个签到表对应几个学生名字，第二层就循环几次
+            for (int j = 0; j < userName.get(i).size(); j++) {
+                //从学生表里找出这个暑期学校所有的学生名字有几个，第三层就循环几次
+                for (int k = 0; k < student.size(); k++) {
+                    /**
+                     * 如果找到了相同的名字,就计算签到评分
+                     * 然后把研究热点id，学生id和签到评分一起加到存储HotSpotSignIn对象的list里
+                     */
+                    if (userName.get(i).get(j).equals(student.get(k).getStudentName())) {
+                        HotSpotSignIn hotSpotSignIn = new HotSpotSignIn();
+
+                        //计算签到评分
+                        int score = calculateSignInScore((Date) startSignInTime.get(i), (Date) signInTime.get(i).get(j));
+
+                        //存入list
+                        hotSpotSignIn.setResearchHotSpotId(hotSpotId.get(i));
+                        hotSpotSignIn.setStudentId(student.get(k).getId());
+                        hotSpotSignIn.setSignInScore(score);
+                    }
+                }
+            }
+
+        }
+
 
     }
 
@@ -112,7 +175,7 @@ public class SignInFormImpl implements FormCleaningService {
      * @return
      */
     @Override
-    public boolean save(CleanSignUp cleanSignUp) {
+    public boolean save(CleanInfo cleanInfo) {
         return false;
     }
 
@@ -129,6 +192,8 @@ public class SignInFormImpl implements FormCleaningService {
 
         //有几个签到表，最外层遍历几次
         for (int k = 0; k < userName.size(); k++) {
+
+            List<String> tempSchoolNameList = new ArrayList<>();
 
             //每个表有多少数据，第二层就遍历几次
             for (int i = 0; i < userName.get(k).size(); i++) {
@@ -156,12 +221,12 @@ public class SignInFormImpl implements FormCleaningService {
                     boolean profession = false;
 
                     for (int j = 0; j < testList.size(); j++) {
-                        if (testList.get(j).contains("大")){
+                        if (testList.get(j).contains("大")) {
                             schoolName = true;
                             tempSchoolName = testList.get(j);
                         }
 
-                        if (testList.get(j).contains("学院")){
+                        if (testList.get(j).contains("学院")) {
                             profession = true;
                         }
 
@@ -174,7 +239,7 @@ public class SignInFormImpl implements FormCleaningService {
                         }
                     }
 
-                    if (schoolName && profession){
+                    if (schoolName && profession) {
                         eachSchoolName = tempSchoolName;
                     }
 
@@ -207,11 +272,55 @@ public class SignInFormImpl implements FormCleaningService {
 
                 //在if-else结束后才进行设置和add，防止多add数据导致全部数据错位
                 userName.get(k).set(i, eachUserName);
-                schoolName.add(eachSchoolName);
+                tempSchoolNameList.add(eachSchoolName);
             }
 
-            schoolNameList.add(schoolName);
-            schoolName.clear();
+            schoolNameList.add(tempSchoolNameList);
+        }
+    }
+
+    /**
+     * 迭代器移除名字双重list里为空的元素
+     */
+    void removeNull() {
+        for (int i = 0; i < userName.size(); i++) {
+            Iterator<String> it = userName.get(i).iterator();
+            while (it.hasNext()) {
+                String x = it.next();
+                if (x.equals("")) {
+                    it.remove();
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 根据签到开始时间和签到时间计算这个学生的签到评分
+     */
+    public int calculateSignInScore(Date startSignInTime,Date signInTime) {
+        //计算两个日期的秒数差
+        int seconds = (int) Duration.between((Temporal) startSignInTime, (Temporal) signInTime).getSeconds();
+
+        //将秒数差传入计算签到评分的函数表达式
+        int score = (int)(-0.000444444444 * seconds + 100);
+        return score;
+    }
+
+    /**
+     * 清洗时间：将传入的List里面的String类型的时间都转为Date类型
+     * time是转前的string,date是转后得到的
+     */
+    public void cleanTime(List stringTimeList) {
+        for (int i = 0; i < stringTimeList.size(); i++) {
+            Date date = null;
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                date = formatter.parse((String) stringTimeList.get(i));
+                stringTimeList.set(i,date);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

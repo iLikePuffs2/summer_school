@@ -72,14 +72,21 @@ public interface StudentDao {
     public List<Student> showStudentInfo();
 
     /**
-     * 查出学生表所有指定暑期学校编号的学生名字
+     * 查出指定暑期学校编号的所有学生表数据
+     * @return
+     */
+    @Select("select * from student_table where summerSchoolId = #{summerSchoolId}")
+    public List<Student> showPartStudentInfo(Integer summerSchoolId);
+
+    /**
+     * 查出指定暑期学校编号的所有学生名字
      * @return
      */
     @Select("select studentName from student_table where summerSchoolId = #{summerSchoolId}")
     public List<String> selectStudentName(Integer summerSchoolId);
 
     /**
-     * 查出学生表所有指定暑期学校编号的学校名称
+     * 查出指定暑期学校编号的所有学校名称
      * @return
      */
     @Select("select schoolName from student_table where summerSchoolId = #{summerSchoolId}")

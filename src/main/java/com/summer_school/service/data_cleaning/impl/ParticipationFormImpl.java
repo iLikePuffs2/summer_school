@@ -1,7 +1,6 @@
 package com.summer_school.service.data_cleaning.impl;
 
-import com.csvreader.CsvReader;
-import com.summer_school.pojo.dto.CleanSignUp;
+import com.summer_school.pojo.dto.CleanInfo;
 import com.summer_school.service.data_cleaning.FormCleaningService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class ParticipationDetailFormImpl implements FormCleaningService {
+public class ParticipationFormImpl implements FormCleaningService {
     private String scheduleStartTime;
     private String scheduleEndTime;
     private String sumUser;
@@ -41,9 +38,9 @@ public class ParticipationDetailFormImpl implements FormCleaningService {
      * @return 这些list的集合
      */
     @Override
-    public void readToList(CleanSignUp cleanSignUp) throws Exception {
+    public void readToList(CleanInfo cleanInfo) throws Exception {
 
-        String fileURL = cleanSignUp.getFileURL();
+        String fileURL = cleanInfo.getFileURL();
         File excel = new File(fileURL);
         Workbook wb;
 
@@ -118,7 +115,7 @@ public class ParticipationDetailFormImpl implements FormCleaningService {
      * 调用相关分析算法进行分析
      */
     @Override
-    public void analyze() {
+    public void analyze(CleanInfo cleanInfo) {
     }
 
     /**
@@ -127,7 +124,7 @@ public class ParticipationDetailFormImpl implements FormCleaningService {
      * @return
      */
     @Override
-    public boolean save(CleanSignUp cleanSignUp) {
+    public boolean save(CleanInfo cleanInfo) {
         return false;
     }
 
