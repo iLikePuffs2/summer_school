@@ -9,23 +9,26 @@ public class Topic {
      * 主题名字
      * 所属暑期学校id
      * 第几天（用户可能需要输入从第几天到第几天的学生学习投入度的变化情况，该属性用于此需求）
+     * 热度
      */
     private Integer id;
     private String date;
     private String name;
     private Integer summerSchoolId;
     private Integer numDay;
+    private Integer participantNum;
 
 
     public Topic() {
     }
 
-    public Topic(Integer id, String date, String name, Integer summerSchoolId, Integer numDay) {
+    public Topic(Integer id, String date, String name, Integer summerSchoolId, Integer numDay, Integer participantNum) {
         this.id = id;
         this.date = date;
         this.name = name;
         this.summerSchoolId = summerSchoolId;
         this.numDay = numDay;
+        this.participantNum = participantNum;
     }
 
     /**
@@ -108,7 +111,23 @@ public class Topic {
         this.numDay = numDay;
     }
 
+    /**
+     * 获取
+     * @return participantNum
+     */
+    public Integer getParticipantNum() {
+        return participantNum;
+    }
+
+    /**
+     * 设置
+     * @param participantNum
+     */
+    public void setParticipantNum(Integer participantNum) {
+        this.participantNum = participantNum;
+    }
+
     public String toString() {
-        return "Topic{id = " + id + ", date = " + date + ", name = " + name + ", summerSchoolId = " + summerSchoolId + ", numDay = " + numDay + "}";
+        return "Topic{id = " + id + ", date = " + date + ", name = " + name + ", summerSchoolId = " + summerSchoolId + ", numDay = " + numDay + ", participantNum = " + participantNum + "}";
     }
 }

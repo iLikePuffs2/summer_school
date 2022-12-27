@@ -8,6 +8,7 @@ public class HotSpot {
      * 研究热点开始时间
      * 研究热点结束时间
      * 会议图片（图片的url）
+     * 热度
      */
     private int researchHotSpotId;
     private String name;
@@ -15,22 +16,22 @@ public class HotSpot {
     private String startTime;
     private String endTime;
     private String meetingImg;
+    private int participantNum;
 
 
     public HotSpot() {
     }
 
-    public HotSpot(int researchHotSpotId, String name, int topicId, String startTime, String endTime, String meetingImg) {
+    public HotSpot(int researchHotSpotId, String name, int topicId, String startTime, String endTime, String meetingImg, int participantNum) {
         this.researchHotSpotId = researchHotSpotId;
         this.name = name;
         this.topicId = topicId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.meetingImg = meetingImg;
+        this.participantNum = participantNum;
     }
 
-
-    
     /**
      * 获取
      * @return researchHotSpotId
@@ -127,7 +128,23 @@ public class HotSpot {
         this.meetingImg = meetingImg;
     }
 
+    /**
+     * 获取
+     * @return participantNum
+     */
+    public int getParticipantNum() {
+        return participantNum;
+    }
+
+    /**
+     * 设置
+     * @param participantNum
+     */
+    public void setParticipantNum(int participantNum) {
+        this.participantNum = participantNum;
+    }
+
     public String toString() {
-        return "HotSpot{researchHotSpotId = " + researchHotSpotId + ", name = " + name + ", topicId = " + topicId + ", startTime = " + startTime + ", endTime = " + endTime + ", meetingImg = " + meetingImg + "}";
+        return "HotSpot{researchHotSpotId = " + researchHotSpotId + ", name = " + name + ", topicId = " + topicId + ", startTime = " + startTime + ", endTime = " + endTime + ", meetingImg = " + meetingImg + ", participantNum = " + participantNum + "}";
     }
 }

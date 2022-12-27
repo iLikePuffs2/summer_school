@@ -31,9 +31,8 @@ public class FillInDataServiceImpl implements FillInDataService {
     public boolean save(CleanInfo cleanInfo) {
 
         //自动生成当天日期
-        Date date=new Date();
-        SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String time = formatter.format(date);
+        String time = cleanInfo.getHotSpotStartTime()[0];
+        time = time.split(" ")[0];
 
         //统计受影响的行数
         int row = 0;

@@ -72,7 +72,7 @@ public interface StudentDao {
     public List<Student> showStudentInfo();
 
     /**
-     * 查出指定暑期学校编号的所有学生表数据
+     * 查出指定暑期学校id的所有学生表数据
      * @return
      */
     @Select("select * from student_table where summerSchoolId = #{summerSchoolId}")

@@ -12,15 +12,10 @@ public class CleanInfo {
 
     /**
      * 清洗参会详情表传入参数包括：
-     * 暑期学校id
-     * 第几天
-     * 日期
-     * 主题名字
-     * 每个研究热点的名字
-     * 每个研究热点的开始时间
-     * 每个研究热点的结束时间
-     * 每个研究热点的会议图片url
+     * 暑期学校id summerSchoolId
      * xlsx文档的url
+     * 主题id topicId
+     * 1个或多个研究热点id hotSpotId
      */
 
 
@@ -41,6 +36,8 @@ public class CleanInfo {
     private String[] hotSpotStartTime;
     private String[] hotSpotEndTime;
     private String[] picUrl;
+    private Integer topicId;
+    private Integer[] hotSpotId;
 
 
     public CleanInfo() {
@@ -49,6 +46,13 @@ public class CleanInfo {
     public CleanInfo(Integer summerSchoolId, String fileURL) {
         this.summerSchoolId = summerSchoolId;
         this.fileURL = fileURL;
+    }
+
+    public CleanInfo(Integer summerSchoolId, String fileURL, Integer topicId, Integer[] hotSpotId) {
+        this.summerSchoolId = summerSchoolId;
+        this.fileURL = fileURL;
+        this.topicId = topicId;
+        this.hotSpotId = hotSpotId;
     }
 
     public CleanInfo(Integer summerSchoolId, String fileURL, String hotSpotNameSingle) {
@@ -80,6 +84,23 @@ public class CleanInfo {
         this.hotSpotStartTime = hotSpotStartTime;
         this.hotSpotEndTime = hotSpotEndTime;
         this.picUrl = picUrl;
+    }
+
+
+    public Integer getTopicId() {
+        return topicId;
+    }
+
+    public void setTopicId(Integer topicId) {
+        this.topicId = topicId;
+    }
+
+    public Integer[] getHotSpotId() {
+        return hotSpotId;
+    }
+
+    public void setHotSpotId(Integer[] hotSpotId) {
+        this.hotSpotId = hotSpotId;
     }
 
     /**

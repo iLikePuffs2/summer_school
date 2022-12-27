@@ -9,6 +9,7 @@ public class HotSpotSignIn {
     private Integer researchHotSpotId;
     private Integer studentId;
     private Integer signInScore;
+    private boolean repeat;
 
 
     public HotSpotSignIn() {
@@ -50,6 +51,15 @@ public class HotSpotSignIn {
      */
     public void setStudentId(Integer studentId) {
         this.studentId = studentId;
+    }
+
+
+    public boolean isRepeat() {
+        return repeat;
+    }
+
+    public void setRepeat(boolean repeat) {
+        this.repeat = repeat;
     }
 
     /**
