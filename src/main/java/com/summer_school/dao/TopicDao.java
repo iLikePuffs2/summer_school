@@ -27,14 +27,22 @@ public interface TopicDao {
      * @return
      */
     @Select("select id from topic_table where name = #{name} and summerSchoolId = #{summerSchoolId}")
-    public int selectId(String name,int summerSchoolId);
+    public Integer selectId(String name,int summerSchoolId);
 
+    /**
+     * 根据暑期学校id和第几天找到主题信息
+     * @param numDay
+     * @param summerSchoolId
+     * @return
+     */
+    @Select("select * from topic_table where numDay = #{numDay} and summerSchoolId = #{summerSchoolId}")
+    public Topic selectBySummerIdAndNumDay(Integer summerSchoolId,Integer numDay);
 
     /**
      * 新增主题数据
      */
     @Insert("insert into topic_table (date, name, summerSchoolId, numDay) VALUES (#{date},#{name},#{summerSchoolId},#{numDay})")
-    public int add(Topic topic);
+    public Integer add(Topic topic);
 
 
     /**
@@ -45,7 +53,7 @@ public interface TopicDao {
      */
     @Insert("insert into topic_attendance_table (topicId, studentId, effectiveAttendanceTime, activeScore, commitmentIndex, signInScore) " +
             "VALUES (#{topicId},#{studentId},#{effectiveAttendanceTime},#{activeScore},#{commitmentIndex},#{signInScore})")
-    public int addTopicAttendance(TopicAttendance topicAttendance);
+    public Integer addTopicAttendance(TopicAttendance topicAttendance);
 
     /**
      * 主题表
@@ -57,7 +65,7 @@ public interface TopicDao {
      * @return
      */
     @Update("update topic_table set participantNum = #{participantNum},activeRate=#{activeRate} where id=#{id}")
-    public int addTopicById(int id,int participantNum,double activeRate);
+    public Integer addTopicById(int id,int participantNum,double activeRate);
 
     @Select("select * from topic_attendance_table where topicId=#{topicId} and studentId=#{studentId}")
     public TopicAttendance selectByTopicIdAndStudentId(int topicId,int studentId);

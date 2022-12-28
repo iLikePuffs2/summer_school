@@ -31,12 +31,13 @@ class SummerSchoolApplicationTests {
 
     @Test
     void test() {
-        try {
-            CleanInfo cleanInfo = new CleanInfo(1,"D:\\Idea project\\summer_school\\src\\main\\java\\com\\summer_school\\file\\ParticipationDetail_13.xlsx",1, new Integer[]{1, 2, 3, 4});
-            formCleaningService.execute(cleanInfo);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            CleanInfo cleanInfo = new CleanInfo(1,"D:\\Idea project\\summer_school\\src\\main\\java\\com\\summer_school\\file\\ParticipationDetail_13.xlsx",1, new Integer[]{1, 2, 3, 4});
+//            formCleaningService.execute(cleanInfo);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+
 
 
 

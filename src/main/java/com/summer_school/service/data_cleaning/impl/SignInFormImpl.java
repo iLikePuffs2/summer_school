@@ -115,34 +115,28 @@ public class SignInFormImpl implements FormCleaningService {
         //清洗签到表里的名字+学校名称
         cleanUserNameAndSchool();
 
-        //清洗签到开始时间和每个学生的签到时间（转为date格式）
+        //清洗签到开始时间和每个学生的签到时间(转为date格式)
         cleanTime();
 
     }
 
     /**
-     * 计算签到评分（只计算这个暑期学校的学生）
+     * 计算签到评分(只计算这个暑期学校的学生)
      */
     @Override
     public void analyze(CleanInfo cleanInfo) {
-        //根据传入的暑期学校id，从学生表里找出这个暑期学校所有的学生名字和id（接收）
+        //根据传入的暑期学校id,从学生表里找出这个暑期学校所有的学生名字和id(接收)
         List<Student> student = studentDao.showPartStudentInfo(cleanInfo.getSummerSchoolId());
 
-        //根据传入的研究热点名字，从研究热点热点表中找出每个对应的id
-        List<Integer> hotSpotId = new ArrayList<>();
-        for (int i = 0; i < cleanInfo.getHotSpotName().length; i++) {
-            hotSpotId.add(hotSpotDao.selectIdByName(cleanInfo.getHotSpotName()[i]));
-        }
-
-        //有几个签到表，最外层就循环几次;第几个签到表，就对应第几个研究热点
-        for (int i = 0; i < userName.size(); i++) {
-            //这个签到表对应几个学生名字，第二层就循环几次
+        //有几个签到表,最外层就循环几次
+        for (int i = 0; i < cleanInfo.getHotSpotId().length; i++) {
+            //这个签到表对应几个学生名字,第二层就循环几次
             for (int j = 0; j < userName.get(i).size(); j++) {
-                //从学生表里找出这个暑期学校所有的学生名字有几个，第三层就循环几次
+                //从学生表里找出这个暑期学校所有的学生名字有几个,第三层就循环几次
                 for (int k = 0; k < student.size(); k++) {
                     /**
                      * 如果找到了相同的名字,就计算签到评分
-                     * 然后把研究热点id，学生id和签到评分一起加到存储HotSpotSignIn对象的list里
+                     * 然后把研究热点id,学生id和签到评分一起加到存储HotSpotSignIn对象的list里
                      */
                     if ("".equals(userName.get(i).get(j))){
                         continue;
@@ -155,7 +149,7 @@ public class SignInFormImpl implements FormCleaningService {
                         int score = calculateSignInScore((Date) startSignInTime.get(i), (Date) signInTime.get(i).get(j));
 
                         //加入对象
-                        hotSpotSignIn.setResearchHotSpotId(hotSpotId.get(i));
+                        hotSpotSignIn.setResearchHotSpotId(cleanInfo.getHotSpotId()[i]);
                         hotSpotSignIn.setStudentId(student.get(k).getId());
                         hotSpotSignIn.setSignInScore(score);
 
@@ -179,10 +173,11 @@ public class SignInFormImpl implements FormCleaningService {
     @Override
     public boolean save(CleanInfo cleanInfo) {
 
-        //查询签到表里的全部研究热点编号（不重复）
+        //查询签到表里的全部研究热点编号(不重复)
         List<Integer> hotSpotIdList = signInDao.selectHotSpotId();
 
-        //如果即将要插入的数据的研究热点id已存在于数据库，就把它们的研究热点id设为0
+        //这里的循环可以大大精简(双重循环遍历一次就可以做到不重复保存)(主题参与那个自我双重循环标记重复的思想)
+        //如果即将要插入的数据的研究热点id已存在于数据库,就把它们的研究热点id设为0
         for (int i = 0; i < signInList.size(); i++) {
             for (int j = 0; j < hotSpotIdList.size(); j++) {
                 if (signInList.get(i).getResearchHotSpotId().equals(hotSpotIdList.get(j))){
@@ -201,8 +196,8 @@ public class SignInFormImpl implements FormCleaningService {
         }
 
 
-        //研究热点id为0的说明是重复数据，不插入
-        //如果isRepeat()为true，说明是这次即将插入的重复数据,也不插入
+        //研究热点id为0的说明是重复数据,不插入
+        //如果isRepeat()为true,说明是这次即将插入的重复数据,也不插入
         int row = 0;
         for (int i = 0; i < signInList.size(); i++) {
             if (signInList.get(i).getResearchHotSpotId().equals(0) || signInList.get(i).isRepeat()){
@@ -220,7 +215,7 @@ public class SignInFormImpl implements FormCleaningService {
 
     /**
      * 清洗签到表的名字和学校名称
-     * 因为没有括号，所以和参会详情表略有不同
+     * 因为没有括号,所以和参会详情表略有不同
      */
     void cleanUserNameAndSchool() {
         List<String> stringList;
@@ -228,12 +223,12 @@ public class SignInFormImpl implements FormCleaningService {
         String eachUserName = "";
         String eachSchoolName = "";
 
-        //有几个签到表，最外层遍历几次
+        //有几个签到表,最外层遍历几次
         for (int k = 0; k < userName.size(); k++) {
 
             List<String> tempSchoolNameList = new ArrayList<>();
 
-            //每个表有多少数据，第二层就遍历几次
+            //每个表有多少数据,第二层就遍历几次
             for (int i = 0; i < userName.get(k).size(); i++) {
                 //清空testList
                 testList.clear();
@@ -294,12 +289,12 @@ public class SignInFormImpl implements FormCleaningService {
                     //单元素处理
                 } else if (testList.size() == 1) {
 
-                    //如果这个元素不是纯中文，判断为无效数据
+                    //如果这个元素不是纯中文,判断为无效数据
                     if (!isAllChinese(testList.get(0))) {
                         eachUserName = "";
                         eachSchoolName = "";
 
-                        //如果这个元素是纯中文，就对他进行(名字+学校名称提取)
+                        //如果这个元素是纯中文,就对他进行(名字+学校名称提取)
                     } else {
                         String[] elementString1 = extractNameAndSchool(testList.get(0));
                         eachUserName = elementString1[0];
@@ -308,7 +303,7 @@ public class SignInFormImpl implements FormCleaningService {
 
                 }
 
-                //在if-else结束后才进行设置和add，防止多add数据导致全部数据错位
+                //在if-else结束后才进行设置和add,防止多add数据导致全部数据错位
                 userName.get(k).set(i, eachUserName);
                 tempSchoolNameList.add(eachSchoolName);
             }
@@ -353,29 +348,34 @@ public class SignInFormImpl implements FormCleaningService {
 
         //清洗签到开始时间
         for (int i = 0; i < startSignInTime.size(); i++) {
-            String str1 = startSignInTime.get(i).toString();
-            Date date = null;
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            try {
-                date = formatter.parse(str1);
-                startSignInTime.set(i,date);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
+            if (startSignInTime.get(i) instanceof String) {
+                String str1 = startSignInTime.get(i).toString();
+                Date date = null;
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try {
+                    date = formatter.parse(str1);
+                    startSignInTime.set(i,date);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
             }
+
         }
 
         //清洗开始时间
         for (int i = 0; i < signInTime.size(); i++) {
             for (int j = 0; j < signInTime.get(i).size(); j++) {
 
-                String str2 = signInTime.get(i).get(j).toString();
-                Date date = null;
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                try {
-                    date = formatter.parse(str2);
-                    signInTime.get(i).set(j,date);
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
+                if (signInTime.get(i).get(j) instanceof String) {
+                    String str2 = signInTime.get(i).get(j).toString();
+                    Date date = null;
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        date = formatter.parse(str2);
+                        signInTime.get(i).set(j, date);
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }

@@ -40,6 +40,7 @@ public class ParticipationFormImpl implements FormCleaningService {
     private String scheduleStartTime;
     private String scheduleEndTime;
     private String sumUser;
+    private boolean saveStatus = false;
     private List<String> userName = new ArrayList<>();
     private List<String> schoolName = new ArrayList<>();
 
@@ -76,6 +77,19 @@ public class ParticipationFormImpl implements FormCleaningService {
      */
     @Override
     public void readToList(CleanInfo cleanInfo) throws Exception {
+        saveStatus = false;
+        userName.clear();
+        schoolName.clear();
+        enterTime.clear();
+        quitTime.clear();
+        hotSpotStartTime.clear();
+        hotSpotEndTime.clear();
+        hotSpotLength.clear();
+        onceLength.clear();
+        studentList.clear();
+        helperList.clear();
+        topicList.clear();
+
 
         String fileURL = cleanInfo.getFileURL();
         File excel = new File(fileURL);
@@ -100,10 +114,10 @@ public class ParticipationFormImpl implements FormCleaningService {
         cell = row.getCell(1);
         scheduleEndTime = cell.toString();
 
-        //读取参会用户总数
+/*        //读取参会用户总数
         row = sheet.getRow(6);
         cell = row.getCell(1);
-        sumUser = cell.toString();
+        sumUser = cell.toString();*/
 
 
         //遍历行
@@ -156,8 +170,11 @@ public class ParticipationFormImpl implements FormCleaningService {
     public void analyze(CleanInfo cleanInfo) {
         //把入会时间转为date类型
         cleanTime(enterTime);
+
+
         //把退出时间转为date类型
         cleanTime(quitTime);
+
 
         //获取数据库里这一天的每场研究热点的开始时间、结束时间、时长
         getHotSpotInfo(cleanInfo);
@@ -172,10 +189,16 @@ public class ParticipationFormImpl implements FormCleaningService {
         markIsEffectiveAndStudentId();
 
         //分析并保存参会详情表里每个研究热点的全部相关数据
-        analyzeEachHotSpotAndSave(cleanInfo);
+        boolean flagHot = false;
+        flagHot = analyzeEachHotSpotAndSave(cleanInfo);
 
         //分析并保存主题的全部相关数据
-        analyzeEachTopicAndSave(cleanInfo);
+        boolean flagTopic = false;
+        flagTopic = analyzeEachTopicAndSave(cleanInfo);
+
+        if (flagHot && flagTopic) {
+            saveStatus = true;
+        }
 
     }
 
@@ -186,7 +209,7 @@ public class ParticipationFormImpl implements FormCleaningService {
      */
     @Override
     public boolean save(CleanInfo cleanInfo) {
-        return false;
+        return saveStatus;
     }
 
 
@@ -449,16 +472,24 @@ public class ParticipationFormImpl implements FormCleaningService {
      */
     public void cleanTime(List list) {
         for (int i = 0; i < list.size(); i++) {
-            String str1 = list.get(i).toString();
-            Date date = null;
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            try {
-                date = formatter.parse(str1);
-                list.set(i, date);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
+
+            if (list.get(i) instanceof String && ((String) list.get(i)).length() == 19) {
+                String str1 = list.get(i).toString();
+                Date date = null;
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try {
+                    date = formatter.parse(str1);
+                    list.set(i, date);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (list.get(i).equals("--")) {
+                list.set(i, new Date());
             }
+
+
         }
+
     }
 
     /**
@@ -608,7 +639,7 @@ public class ParticipationFormImpl implements FormCleaningService {
     /**
      * 分析并保存参会详情表里每个研究热点的全部相关数据
      */
-    private void analyzeEachHotSpotAndSave(CleanInfo cleanInfo) {
+    private boolean analyzeEachHotSpotAndSave(CleanInfo cleanInfo) {
 
         //每次循环处理一个研究热点
         for (int i = 0; i < cleanInfo.getHotSpotId().length; i++) {
@@ -637,13 +668,13 @@ public class ParticipationFormImpl implements FormCleaningService {
                     int activeScore = calculateActiveScore((Date) hotSpotStartTime.get(i), data);
 
                     //计算并返回这条数据在许可范围内的起始时间、终止时间、时长(用Conference对象封装)
-                    data = calculateRestrictedOnceLength(conference, data);
+                    int length = calculateRestrictedOnceLength(conference, data);
 
-                    //如果data不为空,打标记+设置许可范围内的单次参会时长+积极性评分
+                    //如果length>0,打标记+设置许可范围内的单次参会时长+积极性评分
                     //如果为空,打标记+设置0、0
-                    if (data != null) {
+                    if (length > 0) {
                         helperList.get(j).setIsRestrictedEffective(true);
-                        helperList.get(j).setOnceRestrictedLength(data.getLength());
+                        helperList.get(j).setOnceRestrictedLength(length);
                         helperList.get(j).setActiveScore(activeScore);
                     } else {
                         helperList.get(j).setIsRestrictedEffective(false);
@@ -779,11 +810,17 @@ public class ParticipationFormImpl implements FormCleaningService {
              * 根据participantNum和countActive计算积极参与率activeRate(double型)
              * 再根据研究热点id把participantNum和activeRate存入之前数据不完整的研究热点表的数据(update语句)
              */
-            double activeRate = (double) (countActive) / (double) (participantNum);
-            BigDecimal bigDecimal = new BigDecimal(activeRate).setScale(2, RoundingMode.HALF_UP);
-            activeRate = bigDecimal.doubleValue();
+            double activeRate = 0;
+            if (countActive != 0 && participantNum != 0) {
+                activeRate = (double) (countActive) / (double) (participantNum);
+                BigDecimal bigDecimal = new BigDecimal(activeRate).setScale(2, RoundingMode.HALF_UP);
+                activeRate = bigDecimal.doubleValue();
+            }
+
             hotSpotDao.updateParticipation(cleanInfo.getHotSpotId()[i], participantNum, activeRate);
         }
+
+        return true;
     }
 
     /**
@@ -792,65 +829,94 @@ public class ParticipationFormImpl implements FormCleaningService {
      * 传入热点会议的起始时间、终止时间、时长
      * 参会数据的起始时间、终止时间、时长
      * 逻辑：
-     * 根据两个时长的不同和交集位置的不同,一共可归纳为6种情况：画图很清晰
+     * 根据两个时长的不同和交集位置的不同,一共可归纳为10种情况：画图很清晰
      */
-    Conference calculateRestrictedOnceLength(Conference conference, Conference data) {
+    int calculateRestrictedOnceLength(Conference conference, Conference data) {
 
         Date conferenceStart = conference.getStartTime();
         Date conferenceEnd = conference.getEndTime();
         Date dataStart = data.getStartTime();
         Date dataEnd = data.getEndTime();
+        int conferenceLength = conference.getLength();
+        int dataLength = data.getLength();
+        int actualLength = 0;
 
-        //1.data在conference左边,且无交集
-        if (calculateTimeDifference(dataEnd, conferenceStart) >= 0) {
-            data = null;
-        }
+        //一.data更短/和conference一样长
+        if (dataLength <= conferenceLength) {
 
-        //2.data在conference左边,有交集
-        if (calculateTimeDifference(dataStart, conferenceStart) > 0 && calculateTimeDifference(conferenceStart, dataEnd) > 0) {
-            int onceLength = calculateTimeDifference(conferenceStart, dataEnd);
-            //如果交集时间差满足最低有效时长判定,就返回一个Conference对象,里面包含许可范围内的起始时间、终止时间、有效时长、积极度评分
-            if (judgeIsEffective(onceLength)) {
-                data = new Conference(conferenceStart, dataEnd, onceLength);
+            //1.data在conference左边,且无交集
+            if (calculateTimeDifference(dataEnd, conferenceStart) >= 0) {
+                actualLength = 0;
+
+                //2.data在conference左边,有交集
+            } else if (calculateTimeDifference(dataStart, conferenceStart) > 0 && calculateTimeDifference(conferenceStart, dataEnd) > 0) {
+                int onceLength = calculateTimeDifference(conferenceStart, dataEnd);
+                if (judgeIsEffective(onceLength)) {
+                    actualLength = onceLength;
+                } else {
+                    actualLength = 0;
+                }
+
+                //3.data在conference内部(包括完全重合的情况)
+            } else if (calculateTimeDifference(conferenceStart, dataStart) >= 0 && calculateTimeDifference(dataEnd, conferenceEnd) >= 0) {
+
+                actualLength = dataLength;
+
+                //4.data在conference右边,有交集
+            } else if (calculateTimeDifference(dataStart, conferenceEnd) > 0 && calculateTimeDifference(conferenceEnd, dataEnd) > 0) {
+                int onceLength = calculateTimeDifference(dataStart, conferenceEnd);
+                if (judgeIsEffective(onceLength)) {
+                    actualLength = onceLength;
+                } else {
+                    actualLength = 0;
+                }
+
+                //5.data在conference右边,且无交集
             } else {
-                data = null;
+
             }
-        }
 
-        //3.data在conference内部(包括完全重合的情况)
-        if (calculateTimeDifference(conferenceStart, dataStart) >= 0 && calculateTimeDifference(dataEnd, conferenceEnd) >= 0) {
-            data = new Conference(dataStart, dataEnd, data.getLength());
-        }
+            //二.data更长
+        } else {
 
-        //4.conference在data内部
-        if (calculateTimeDifference(dataStart, conferenceStart) >= 0 && calculateTimeDifference(conferenceEnd, dataEnd) >= 0) {
-            data = new Conference(conferenceStart, conferenceEnd, conference.getLength());
-        }
+            //1.data在conference左边,且无交集
+            if (calculateTimeDifference(dataEnd, conferenceStart) >= 0) {
+                actualLength = 0;
 
-        //5.data在conference右边,有交集
-        if (calculateTimeDifference(dataStart, conferenceEnd) > 0 && calculateTimeDifference(conferenceEnd, dataEnd) > 0) {
-            int onceLength = calculateTimeDifference(dataStart, conferenceEnd);
-            if (judgeIsEffective(onceLength)) {
-                data = new Conference(dataStart, conferenceEnd, onceLength);
+                //2.data在conference左边,有交集
+            } else if (calculateTimeDifference(dataStart, conferenceStart) > 0 && calculateTimeDifference(conferenceStart, dataEnd) > 0) {
+                int onceLength = calculateTimeDifference(conferenceStart, dataEnd);
+                if (judgeIsEffective(onceLength)) {
+                    actualLength = onceLength;
+                } else {
+                    actualLength = 0;
+                }
+
+                //3.conference在data内部
+            } else if (calculateTimeDifference(dataStart, conferenceStart) >= 0 && calculateTimeDifference(conferenceEnd, dataEnd) >= 0) {
+
+                actualLength = conferenceLength;
+
+                //4.data在conference右边,有交集
+            } else if (calculateTimeDifference(dataStart, conferenceEnd) > 0 && calculateTimeDifference(conferenceEnd, dataEnd) > 0) {
+                int onceLength = calculateTimeDifference(dataStart, conferenceEnd);
+                if (judgeIsEffective(onceLength)) {
+                    actualLength = onceLength;
+                } else {
+                    actualLength = 0;
+                }
+
+                //5.data在conference右边,且无交集
             } else {
-                data = null;
+
             }
         }
 
-        //6.data在conference右边,且无交集
-        if (calculateTimeDifference(conferenceEnd, dataStart) >= 0) {
-            data = null;
+        if (actualLength > conferenceLength) {
+            actualLength = conferenceLength;
         }
 
-        //如果data不为空,检查data的单次有效参会时长,防止超过上线
-        if (data != null) {
-            if (data.getLength() >= conference.getLength()) {
-                data.setLength(conference.getLength());
-            }
-        }
-
-
-        return data;
+        return actualLength;
     }
 
     //计算积极性评分
@@ -862,52 +928,88 @@ public class ParticipationFormImpl implements FormCleaningService {
         //将会议实际开始时间后的5min视作积极性判定的结束时间
         long startLength = 15 * 60 * 1000;
         long endLength = 5 * 60 * 1000;
-        Date conferenceStart = new Date(conferenceStartTime.getTime() - startLength);
-        Date conferenceEnd = new Date(conferenceStartTime.getTime() + endLength);
+        int conferenceLength = 20;
+        int dataLength = data.getLength();
+        Date cS = new Date(conferenceStartTime.getTime() - startLength);
+        Date cE = new Date(conferenceStartTime.getTime() + endLength);
+        Date dS = data.getStartTime();
+        Date dE = data.getEndTime();
 
-        Date dataStart = data.getStartTime();
-        Date dataEnd = data.getEndTime();
+        //一.data更短/和conference一样长
+        if (dataLength <= conferenceLength) {
 
-        //1.data在conference左边,且无交集
-        if (calculateTimeDifference(dataEnd, conferenceStart) >= 0) {
-            score = 0;
-        }
+            //1.data在conference左边,且无交集
+            if (calculateTimeDifference(dE, cS) >= 0) {
+                score = 0;
 
+                //2.data在conference左边,有交集
+            } else if (calculateTimeDifference(dS, cS) > 0 && calculateTimeDifference(cS, dE) > 0) {
+                int onceLength = calculateTimeDifference(cS, dE);
+                //如果交集时间不少于5min,就视作他最早就来了(评分为满分),否则还是0分
+                if (judgeIsEffective(onceLength)) {
+                    score = calculateActiveScoreFormula(cS, cS);
+                }
 
-        //2.data在conference左边,有交集
-        if (calculateTimeDifference(dataStart, conferenceStart) > 0 && calculateTimeDifference(conferenceStart, dataEnd) > 0) {
-            int onceLength = calculateTimeDifference(conferenceStart, dataEnd);
+                //3.data在conference内部(包括完全重合的情况)
+            } else if (calculateTimeDifference(cS, dS) >= 0 && calculateTimeDifference(dE, cE) >= 0) {
 
-            //如果交集时间不少于3min,就视作他最早就来了(评分为满分),否则还是0分
-            if (onceLength >= 3) {
-                score = calculateActiveScoreFormula(conferenceStart, conferenceStart);
+                if (judgeIsEffective(dataLength)){
+                    score = calculateActiveScoreFormula(cS, dS);
+                }
+
+                //4.data在conference右边,有交集
+            } else if (calculateTimeDifference(dS, cE) > 0 && calculateTimeDifference(cE, dE) > 0) {
+                int onceLength = calculateTimeDifference(dS, cE);
+
+                if (judgeIsEffective(onceLength)){
+                    score = calculateActiveScoreFormula(cS, dS);
+                }
+
+                //5.data在conference右边,且无交集
+            } else {
+
+            }
+
+            //二.data更长
+        } else {
+
+            //1.data在conference左边,且无交集
+            if (calculateTimeDifference(dE, cS) >= 0) {
+                score = 0;
+
+                //2.data在conference左边,有交集
+            } else if (calculateTimeDifference(dS, cS) > 0 && calculateTimeDifference(cS, dE) > 0) {
+                int onceLength = calculateTimeDifference(cS, dE);
+                //如果交集时间不少于5min,就视作他最早就来了(评分为满分),否则还是0分
+                if (judgeIsEffective(onceLength)) {
+                    score = calculateActiveScoreFormula(cS, cS);
+                }
+
+                //3.conference在data内部
+            } else if (calculateTimeDifference(dS, cS) >= 0 && calculateTimeDifference(cE, dE) >= 0) {
+
+                score = calculateActiveScoreFormula(cS, dS);
+
+                //4.data在conference右边,有交集
+            } else if (calculateTimeDifference(dS, cE) > 0 && calculateTimeDifference(cE, dE) > 0) {
+                int onceLength = calculateTimeDifference(dS, cE);
+
+                if (judgeIsEffective(onceLength)){
+                    score = calculateActiveScoreFormula(cS, dS);
+                }
+
+                //5.data在conference右边,且无交集
+            } else {
+
             }
         }
 
-        //3.data在conference内部(包括完全重合的情况)
-        if (calculateTimeDifference(conferenceStart, dataStart) >= 0 && calculateTimeDifference(dataEnd, conferenceEnd) >= 0) {
-            score = calculateActiveScoreFormula(conferenceStart, dataStart);
-        }
 
-        //4.conference在data内部——连续上课——视作他最早就来了(评分为满分)
-        if (calculateTimeDifference(dataStart, conferenceStart) >= 0 && calculateTimeDifference(conferenceEnd, dataEnd) >= 0) {
-            score = calculateActiveScoreFormula(conferenceStart, conferenceStart);
-        }
 
-        //5.data在conference右边,有交集
-        if (calculateTimeDifference(dataStart, conferenceEnd) > 0 && calculateTimeDifference(conferenceEnd, dataEnd) > 0) {
-            int onceLength = calculateTimeDifference(dataStart, conferenceEnd);
 
-            //如果交集时间不少于3min,就进行评分
-            if (onceLength >= 3) {
-                score = calculateActiveScoreFormula(conferenceStart, dataStart);
-            }
-        }
 
-        //6.data在conference右边,且无交集
-        if (calculateTimeDifference(conferenceEnd, dataStart) >= 0) {
-            score = 0;
-        }
+
+
 
         return score;
     }
@@ -942,7 +1044,7 @@ public class ParticipationFormImpl implements FormCleaningService {
         double lengthScore = 0;
 
         //计算有效参会总时长得分(基础分50——大家都有,额外分最高25——线性)
-        lengthScore = 50 + 25 * ((double)cumulativeLength / (double)conferenceLength);
+        lengthScore = 50 + 25 * ((double) cumulativeLength / (double) conferenceLength);
 
         //计算签到得分(实际签到得分的1/4,满分25)
         signInScore = signInScore / 4;
@@ -950,7 +1052,7 @@ public class ParticipationFormImpl implements FormCleaningService {
         //计算积极性得分(实际积极性得分的1/4,满分25)
         activeScore = activeScore / 4;
 
-        sumScore = (int)lengthScore + signInScore + activeScore;
+        sumScore = (int) lengthScore + signInScore + activeScore;
 
         if (sumScore > 100) {
             sumScore = 100;
@@ -972,7 +1074,7 @@ public class ParticipationFormImpl implements FormCleaningService {
         }
 
         //计算有效参会总时长得分(最高80——线性)
-        double lengthScore = 80 * ((double)cumulativeLength / (double)sumTime);
+        double lengthScore = 80 * ((double) cumulativeLength / (double) sumTime);
 
         //计算签到得分(实际签到得分的1/4,满分25)
         signInScore = signInScore / 4;
@@ -980,7 +1082,7 @@ public class ParticipationFormImpl implements FormCleaningService {
         //计算积极性得分(实际积极性得分的1/4,满分25)
         activeScore = activeScore / 4;
 
-        sumScore = (int)lengthScore + signInScore + activeScore;
+        sumScore = (int) lengthScore + signInScore + activeScore;
 
         if (sumScore > 100) {
             sumScore = 100;
@@ -991,7 +1093,7 @@ public class ParticipationFormImpl implements FormCleaningService {
     }
 
     //分析并保存主题的全部相关数据
-    private void analyzeEachTopicAndSave(CleanInfo cleanInfo) {
+    private boolean analyzeEachTopicAndSave(CleanInfo cleanInfo) {
 
         //第一轮循环,把helperList里有效的数据的有用的部分挪到topicList里
         for (int i = 0; i < helperList.size(); i++) {
@@ -1085,7 +1187,7 @@ public class ParticipationFormImpl implements FormCleaningService {
                 //最值限制
                 int sumTime = 0;
                 for (int j = 0; j < hotSpotLength.size(); j++) {
-                    sumTime += (Integer)hotSpotLength.get(j);
+                    sumTime += (Integer) hotSpotLength.get(j);
                 }
 
                 if (topicList.get(i).getSumLength() >= sumTime) {
@@ -1097,8 +1199,20 @@ public class ParticipationFormImpl implements FormCleaningService {
                 }
 
 
-                //如果有学生id(不为null),额外做3件事
-                if (topicList.get(i).getStudentId() != null) {
+
+                //判断是否有效参与主题
+                boolean judge = judgeTopicEffective(topicList.get(i).getSumLength());
+                if (judge) {
+                    participantNum++;
+                }
+
+                //判断是否积极参与主题(积极参与次数>=2)
+                if (topicList.get(i).getActiveNumber() >= 2 && judge) {
+                    countActive++;
+                }
+
+                //如果有学生id(不为null),且被判定为有效参与主题(时长>30%),就额外做3件事
+                if (topicList.get(i).getStudentId() != null && judge) {
 
                     //1.用学生id和所有研究热点id，到签到表里找签到评分，一次只能找一个分数,循环找几次，全部找出后再取平均分即可
                     int sum = 0;
@@ -1117,7 +1231,6 @@ public class ParticipationFormImpl implements FormCleaningService {
                     int commitment = calculateTopicCommitment(topicList.get(i).getSumLength(), averageSignInScore, activeScore);
 
                     //3.将6条数据插入主题参与表
-
                     TopicAttendance topicAttendance = new TopicAttendance(cleanInfo.getTopicId(), topicList.get(i).getStudentId(), topicList.get(i).getSumLength(), activeScore, commitment, averageSignInScore);
 
                     //每次插入数据前用主题id和学生id找一下有没有重复的,防止重复插入
@@ -1128,18 +1241,6 @@ public class ParticipationFormImpl implements FormCleaningService {
                         topicDao.addTopicAttendance(topicAttendance);
                     }
 
-                }
-
-
-                //判断是否有效参与主题
-                boolean judge = judgeTopicEffective(topicList.get(i).getSumLength());
-                if (judge) {
-                    participantNum++;
-                }
-
-                //判断是否积极参与主题(积极参与次数>=2)
-                if (topicList.get(i).getActiveNumber() >= 2) {
-                    countActive++;
                 }
             }
         }
@@ -1152,6 +1253,7 @@ public class ParticipationFormImpl implements FormCleaningService {
         //update主题表，补充这两个数据
         topicDao.addTopicById(cleanInfo.getTopicId(), participantNum, activeRate);
 
+        return true;
 
     }
 
@@ -1166,11 +1268,9 @@ public class ParticipationFormImpl implements FormCleaningService {
             Conference conference = new Conference((Date) hotSpotStartTime.get(i), (Date) hotSpotEndTime.get(i), (Integer) hotSpotLength.get(i));
             Conference data = new Conference(topicHelper.getEnterTime(), topicHelper.getQuitTime(), topicHelper.getOnceLength());
 
-            data = calculateRestrictedOnceLength(conference, data);
-            //如果有返回值,累加
-            if (data != null) {
-                sumTime += data.getLength();
-            }
+            int length = calculateRestrictedOnceLength(conference, data);
+            sumTime += length;
+
         }
 
         return sumTime;

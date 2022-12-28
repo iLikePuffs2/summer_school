@@ -21,7 +21,15 @@ public interface HotSpotDao {
      * @return
      */
     @Select("select researchHotSpotId from research_hot_spot_table where name = #{hotSpotName}")
-    public int selectIdByName(String hotSpotName);
+    public Integer selectIdByName(String hotSpotName);
+
+    /**
+     * 研究热点表
+     * 根据主题id查询
+     * @return
+     */
+    @Select("select * from research_hot_spot_table where topicID = #{topicId}")
+    public List<HotSpot> selectByTopicId(Integer topicId);
 
     /**
      * 研究热点表
@@ -37,7 +45,7 @@ public interface HotSpotDao {
      * 新增研究热点数据
      */
     @Insert("insert into research_hot_spot_table (name, topicId, startTime, endTime, meetingImg) VALUES (#{name},#{topicId},#{startTime},#{endTime},#{meetingImg})")
-    public int add(HotSpot hotSpot);
+    public Integer add(HotSpot hotSpot);
 
 
 
@@ -47,7 +55,7 @@ public interface HotSpotDao {
      * @return
      */
     @Insert("insert into research_hot_spot_attendance_table(researchHotSpotId, studentId, effectiveAttendanceTime, activeScore, commitmentIndex) VALUES (#{researchHotSpotId},#{studentId},#{effectiveAttendanceTime},#{activeScore},#{commitmentIndex})")
-    public int addAttendanceInfo(HotSpotAttendance hotSpotAttendance);
+    public Integer addAttendanceInfo(HotSpotAttendance hotSpotAttendance);
 
     /**
      * 研究热点参与表
@@ -69,7 +77,7 @@ public interface HotSpotDao {
      * @return
      */
     @Update("update research_hot_spot_table set participantNum = #{participantNum}, activeRate = #{activeRate} where researchHotSpotId = #{researchHotSpotId}")
-    public int updateParticipation(Integer researchHotSpotId,Integer participantNum,double activeRate);
+    public Integer updateParticipation(Integer researchHotSpotId,Integer participantNum,double activeRate);
 
 
 }
