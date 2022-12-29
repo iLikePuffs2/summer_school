@@ -1,19 +1,21 @@
 package com.summer_school.controller.analyze.variable;
 
 import com.summer_school.controller.tool.Result;
-import com.summer_school.pojo.dto.CleanInfo;
 import com.summer_school.pojo.dto.into.FreeStudentIntoDto;
 import com.summer_school.pojo.dto.into.SolidStudentIntoDto;
 import com.summer_school.service.analyze.OptionalAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/analyze/variable/active")
-public class ActiveAnalyseController {
+@RequestMapping("/analyze/variable/commitment")
+public class CommitmentAnalyseController {
 
-    @Qualifier("activeAnalyseImpl")
+    @Qualifier("commitmentAnalyseImpl")
     @Autowired
     OptionalAnalysisService optionalAnalysisService;
 

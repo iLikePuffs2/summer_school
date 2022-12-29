@@ -5,7 +5,7 @@ public class FreeStudentIntoDto {
     /**
      *这是指定天数/主题/研究热点的Dto
      */
-
+    private Integer choice;
 
     //固定项的值(天数/主题id/研究热点id)
     private Integer solidValue;
@@ -30,12 +30,28 @@ public class FreeStudentIntoDto {
         this.studentVariableNum = studentVariableNum;
     }
 
+    public FreeStudentIntoDto(Integer choice, Integer solidValue, Integer[] studentSolidNum, String[] studentSolidValue, Integer studentVariableNum) {
+        this.choice = choice;
+        this.solidValue = solidValue;
+        this.studentSolidNum = studentSolidNum;
+        this.studentSolidValue = studentSolidValue;
+        this.studentVariableNum = studentVariableNum;
+    }
+
     /**
      * 获取
      * @return solidValue
      */
     public Integer getSolidValue() {
         return solidValue;
+    }
+
+    public Integer getChoice() {
+        return choice;
+    }
+
+    public void setChoice(Integer choice) {
+        this.choice = choice;
     }
 
     /**
