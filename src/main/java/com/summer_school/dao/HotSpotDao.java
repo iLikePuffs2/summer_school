@@ -1,6 +1,7 @@
 package com.summer_school.dao;
 
 import com.summer_school.pojo.dto.SummerSchool;
+import com.summer_school.pojo.dto.TopicDto;
 import com.summer_school.pojo.po.HotSpot;
 import com.summer_school.pojo.po.HotSpotAttendance;
 import com.summer_school.pojo.po.HotSpotSignIn;
@@ -14,6 +15,20 @@ import java.util.List;
 
 @Mapper
 public interface HotSpotDao {
+
+    /**
+     *找出研究热点表里的全部数据
+     */
+    @Select("select * from research_hot_spot_table")
+    public List<HotSpot> selectAll();
+
+    /**
+     * 找出研究热点表里的热点名字、参与人数和对应的积极率
+     * @return
+     */
+    @Select("Select name,participantNum,activeRate from research_hot_spot_table order by participantNum DESC")
+    public List<TopicDto> selectHeat();
+
 
     /**
      * 研究热点表

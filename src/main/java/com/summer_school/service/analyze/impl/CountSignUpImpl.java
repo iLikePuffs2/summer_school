@@ -23,7 +23,7 @@ public class CountSignUpImpl implements CountSignUpService {
 
     @Override
     public CountSignUp gender() {
-        String[] genderName = new String[]{"男生", "女生"};
+        String[] genderName = new String[]{"男", "女"};
         Integer[] genderNumber = new Integer[2];
         double[] genderProportion = new double[2];
 

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.summer_school.mapper.HotSpotMapper">
+
+    <select id="countHotSpotActiveGroupAvg" resultType="java.lang.Integer">
+        select AVG(activeScore) from research_hot_spot_attendance_table
+        <where>
+            <if test="researchHotSpotId != null">
+                and researchHotSpotId = #{researchHotSpotId}
+            </if>
+            <if test="studentIdList.size() > 0">
+                and studentId in
+                <foreach item="item" index="index" collection="studentIdList"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="studentIdList.size() == 0">
+                and studentId = 0
+            </if>
+        </where>
+    </select>
+
+    <select id="countHotSpotCommitGroupAvg" resultType="java.lang.Integer">
+        select AVG(commitmentIndex) from research_hot_spot_attendance_table
+        <where>
+            <if test="researchHotSpotId != null">
+                and researchHotSpotId = #{researchHotSpotId}
+            </if>
+            <if test="studentIdList.size() > 0">
+                and studentId in
+                <foreach item="item" index="index" collection="studentIdList"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="studentIdList.size() == 0">
+                and studentId = 0
+            </if>
+        </where>
+    </select>
+
+    <select id="countHotSpotEffectiveLengthAvg" resultType="java.lang.Integer">
+        select AVG(effectiveAttendanceTime) from research_hot_spot_attendance_table
+        <where>
+            <if test="researchHotSpotId != null">
+                and researchHotSpotId = #{researchHotSpotId}
+            </if>
+            <if test="studentIdList.size() > 0">
+                and studentId in
+                <foreach item="item" index="index" collection="studentIdList"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="studentIdList.size() == 0">
+                and studentId = 0
+            </if>
+        </where>
+    </select>
+
+    <select id="countSumEffectiveNum" resultType="java.lang.Integer">
+        select count(*) from research_hot_spot_attendance_table
+        <where>
+            <if test="researchHotSpotId != null">
+                and researchHotSpotId = #{researchHotSpotId}
+            </if>
+            <if test="studentIdList.size() > 0">
+                and studentId in
+                <foreach item="item" index="index" collection="studentIdList"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="studentIdList.size() == 0">
+                and studentId = 0
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

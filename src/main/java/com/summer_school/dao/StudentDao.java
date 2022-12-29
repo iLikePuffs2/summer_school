@@ -6,10 +6,7 @@ import com.summer_school.pojo.dto.SignIn;
 import com.summer_school.pojo.po.AbstractUser;
 import com.summer_school.pojo.po.SignUpInfo;
 import com.summer_school.pojo.po.Student;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -57,6 +54,15 @@ public interface StudentDao {
      */
     @Select("select profession,count(*) as num from student_table group by profession")
     public List<ProfessionDto> countAllProfession();
+
+    /**
+     * 查询所有不重复的专业名称
+     * @return
+     */
+    @Select("select distinct profession from student_table")
+    public String[] selectDistinctProfession();
+
+
 
     /**
      * 根据学校层次查询

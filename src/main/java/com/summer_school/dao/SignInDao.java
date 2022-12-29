@@ -37,8 +37,17 @@ public interface SignInDao {
     public List<Integer> selectHotSpotId();
 
     /**
-     * 用研究热点id和学生id找出这个学生的签到评分
+     * 用1个研究热点id和1个学生id找出这个学生的签到评分
      */
     @Select("select signInScore from sign_in_table where researchHotSpotId = #{researchHotSpotId} and studentId = #{studentId}")
     public Integer selectSignInScore(Integer researchHotSpotId,Integer studentId);
+
+
+//    /**
+//     * 用1个研究热点id和多个个学生id找出这个学生群体的签到评分的平均值
+//     */
+//    @Select("select AVG(signInScore) from sign_in_table where researchHotSpotId = #{HotSpotId} and studentId in (226,58,48,139)")
+//    public Integer selectGroupSignInScore(Integer researchHotSpotId,Integer[] studentIdArr);
+
+
 }

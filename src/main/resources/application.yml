@@ -8,3 +8,9 @@ spring:
   main:
     banner-mode: off
 
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+  config-location: classpath:mybatis-config.xml
+  typeAliasesPackage: com.summer_school.pojo
+
+

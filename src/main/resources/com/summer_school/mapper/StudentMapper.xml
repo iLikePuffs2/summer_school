@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.summer_school.mapper.StudentMapper">
+    <select id="selectByDifferent" resultType="com.summer_school.pojo.po.Student">
+        select * from student_table
+        <where>
+            <if test="schoolLevel != null">
+                and schoolLevel = #{schoolLevel}
+            </if>
+            <if test="studentType != null">
+                and studentType = #{studentType}
+            </if>
+            <if test="grade != null">
+                and grade = #{grade}
+            </if>
+            <if test="profession != null">
+                and profession = #{profession}
+            </if>
+            <if test="gender != null">
+                and gender = #{gender}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectBySolidDifferent" resultType="java.lang.Integer">
+        select id from student_table
+        <where>
+            <if test="schoolLevel != null">
+                and schoolLevel = #{schoolLevel}
+            </if>
+            <if test="studentType != null">
+                and studentType = #{studentType}
+            </if>
+            <if test="grade != null">
+                and grade = #{grade}
+            </if>
+            <if test="profession != null">
+                and profession = #{profession}
+            </if>
+            <if test="gender != null">
+                and gender = #{gender}
+            </if>
+        </where>
+    </select>
+
+</mapper>
